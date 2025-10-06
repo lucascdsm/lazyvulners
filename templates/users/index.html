@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+  <h3>Usuários</h3>
+  <div>
+    <a href="/users/new" class="btn btn-success">Novo Usuário</a>
+  </div>
+  </div>
+<form class="row g-2 my-2">
+  <div class="col-sm-4">
+    <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="Buscar por usuário">
+  </div>
+  <div class="col-sm-2">
+    <button class="btn btn-outline-primary">Buscar</button>
+  </div>
+</form>
+<div class="card p-2">
+<table class="table table-striped mb-0">
+  <thead>
+    <tr>
+      <th>Usuário</th><th>Papel</th><th>Empresas</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.username }}</td>
+      <td>{{ u.role }}</td>
+      <td>{{ u.company or '-' }}</td>
+      <td class="text-nowrap">
+        <a class="btn btn-sm btn-primary" href="/users/{{ u.id }}/edit">Editar</a>
+        <a class="btn btn-sm btn-secondary" href="/users/{{ u.id }}/password">Senha</a>
+        <form method="post" action="/users/{{ u.id }}/delete" style="display:inline" onsubmit="return confirm('Remover usuário?');">
+          <button class="btn btn-sm btn-danger" {% if u.id == current_user.id %}disabled{% endif %}>Remover</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3">Nenhum usuário</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
+
+

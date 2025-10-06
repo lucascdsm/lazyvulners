@@ -1,0 +1,240 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1">Relatórios</h2>
+        <p class="text-muted mb-0">
+          <i class="bi bi-shield-lock me-1"></i>
+          Ambiente Isolado: <strong>{{ selected_company }}</strong>
+        </p>
+      </div>
+      <div class="text-end">
+        <div class="d-flex gap-2 align-items-center">
+          <a href="{{ url_for('main.ai_config') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-robot me-1"></i>AI Assistant
+          </a>
+          <span class="badge bg-success">
+            <i class="bi bi-check-circle me-1"></i>Dados Isolados
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards de Relatórios -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="report-card">
+        <div class="report-icon bg-danger">
+          <i class="bi bi-file-earmark-pdf"></i>
+        </div>
+        <div class="report-content">
+          <h5 class="report-title">Relatório Completo</h5>
+          <p class="report-description">
+            Relatório detalhado com todas as vulnerabilidades da empresa {{ selected_company }}.
+          </p>
+          <a href="/export/report.pdf" class="btn btn-danger w-100">
+            <i class="bi bi-download me-1"></i>Baixar PDF
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="report-card">
+        <div class="report-icon bg-success">
+          <i class="bi bi-graph-up"></i>
+        </div>
+        <div class="report-content">
+          <h5 class="report-title">Relatório Executivo</h5>
+          <p class="report-description">
+            Resumo executivo para gestão da empresa {{ selected_company }}.
+          </p>
+          <a href="/export/report-executivo.pdf" class="btn btn-success w-100">
+            <i class="bi bi-download me-1"></i>Baixar PDF
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="report-card">
+        <div class="report-icon bg-primary">
+          <i class="bi bi-gear"></i>
+        </div>
+        <div class="report-content">
+          <h5 class="report-title">Relatório Técnico</h5>
+          <p class="report-description">
+            Detalhes técnicos para análise de segurança da empresa {{ selected_company }}.
+          </p>
+          <a href="/export/report-tecnico.pdf" class="btn btn-primary w-100">
+            <i class="bi bi-download me-1"></i>Baixar PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informações de Isolamento -->
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-shield-check me-2"></i>Segurança dos Dados
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h6 class="mb-1 text-success">
+            <i class="bi bi-shield-check me-2"></i>
+            Ambiente Completamente Isolado
+          </h6>
+          <p class="text-muted mb-0">
+            Todos os relatórios contêm apenas dados da empresa <strong>{{ selected_company }}</strong>. 
+            Não há cruzamento de informações com outras empresas.
+          </p>
+        </div>
+        <div class="col-md-4 text-end">
+          <span class="badge bg-success fs-6">
+            <i class="bi bi-lock me-1"></i>Dados Seguros
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.dashboard-container {
+  padding: 2rem;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  min-height: calc(100vh - 76px);
+}
+
+.sidebar-content {
+  padding: 2rem 1rem;
+}
+
+.sidebar-header h6 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-nav .nav-link {
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  background: var(--card);
+  color: var(--text);
+}
+
+.sidebar-nav .nav-link.active {
+  background: var(--blue-500);
+  color: white;
+}
+
+.main-content {
+  background: var(--bg);
+  min-height: calc(100vh - 76px);
+}
+
+.content-wrapper {
+  padding: 2rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.report-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.report-card:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,.35);
+  transform: translateY(-2px);
+}
+
+.report-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.report-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.report-title {
+  color: var(--text);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.report-description {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .content-wrapper {
+    padding: 1rem;
+  }
+  
+  .sidebar {
+    min-height: auto;
+  }
+}
+</style>
+{% endblock %}

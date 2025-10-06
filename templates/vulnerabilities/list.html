@@ -1,0 +1,305 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1">Todas as Vulnerabilidades</h2>
+        <p class="text-muted mb-0">
+          <i class="bi bi-shield-lock me-1"></i>
+          Ambiente Isolado: <strong>{{ selected_company }}</strong>
+        </p>
+      </div>
+      <div class="text-end">
+        <div class="d-flex gap-2 align-items-center">
+          <a href="{{ url_for('main.ai_config') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-robot me-1"></i>AI Assistant
+          </a>
+          <span class="badge bg-success">
+            <i class="bi bi-check-circle me-1"></i>Dados Isolados
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-funnel me-2"></i>Filtros de Busca
+      </h5>
+    </div>
+    <div class="card-body">
+      <form class="row g-3" method="GET">
+        <div class="col-md-4">
+          <label class="form-label text-white">Buscar</label>
+          <input type="text" name="q" class="form-control text-white bg-dark border-secondary" value="{{ q }}" placeholder="Título da vulnerabilidade">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-white">Severidade</label>
+          <select name="severity" class="form-select text-white bg-dark border-secondary">
+            <option value="">Todas</option>
+            <option value="Critical" {% if severity == 'Critical' %}selected{% endif %}>Critical</option>
+            <option value="High" {% if severity == 'High' %}selected{% endif %}>High</option>
+            <option value="Medium" {% if severity == 'Medium' %}selected{% endif %}>Medium</option>
+            <option value="Low" {% if severity == 'Low' %}selected{% endif %}>Low</option>
+            <option value="Informative" {% if severity == 'Informative' %}selected{% endif %}>Informative</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label text-white">Status</label>
+          <select name="status" class="form-select text-white bg-dark border-secondary">
+            <option value="">Todos</option>
+            <option value="Open" {% if status == 'Open' %}selected{% endif %}>Open</option>
+            <option value="In Progress" {% if status == 'In Progress' %}selected{% endif %}>In Progress</option>
+            <option value="Closed" {% if status == 'Closed' %}selected{% endif %}>Closed</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">&nbsp;</label>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search me-1"></i>Filtrar
+          </button>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">&nbsp;</label>
+          <a href="/vulnerabilities" class="btn btn-outline-secondary w-100">
+            <i class="bi bi-arrow-clockwise me-1"></i>Limpar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de Vulnerabilidades -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="bi bi-list-ul me-2"></i>Lista de Vulnerabilidades
+        <span class="badge bg-primary ms-2">{{ vulns|length }} encontradas</span>
+      </h5>
+      <a href="/vulnerabilities/new" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Nova Vulnerabilidade
+      </a>
+    </div>
+    <div class="card-body p-0">
+      {% if vulns %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Título</th>
+              <th>Severidade</th>
+              <th>Status</th>
+              <th>CVSS</th>
+              <th>Criado</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vuln in vulns %}
+            <tr>
+              <td>
+                <div class="fw-bold">{{ vuln.title }}</div>
+                {% if vuln.description %}
+                <small class="text-muted">{{ vuln.description[:100] }}{% if vuln.description|length > 100 %}...{% endif %}</small>
+                {% endif %}
+              </td>
+              <td>
+                {% set sev = (vuln.severity or '').lower() %}
+                <span class="badge {% if sev == 'critical' %}bg-danger{% elif sev == 'high' %}bg-warning{% elif sev == 'medium' %}bg-info{% elif sev == 'low' %}bg-secondary{% else %}bg-primary{% endif %}">
+                  {{ vuln.severity }}
+                </span>
+              </td>
+              <td>
+                {% set st = (vuln.status or '').lower().replace(' ','') %}
+                <span class="badge {% if st == 'open' %}bg-danger{% elif st == 'inprogress' %}bg-warning{% else %}bg-success{% endif %}">
+                  {{ vuln.status }}
+                </span>
+              </td>
+              <td>
+                {% if vuln.cvss %}
+                <span class="fw-bold">{{ vuln.cvss }}</span>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <small class="text-muted">{{ vuln.created_at.strftime('%d/%m/%Y') }}</small>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <a class="btn btn-sm btn-outline-primary" href="/vulnerabilities/{{ vuln.id }}" title="Visualizar">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a class="btn btn-sm btn-outline-secondary" href="/vulnerabilities/{{ vuln.id }}/edit" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a class="btn btn-sm btn-outline-info" href="/export/vulnerability/{{ vuln.id }}.pdf" title="PDF">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Paginação -->
+      {% if pagination.pages > 1 %}
+      <div class="card-footer">
+        <nav aria-label="Navegação de páginas">
+          <ul class="pagination pagination-sm justify-content-center mb-0">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ pagination.prev_num }}{% if q %}&q={{ q }}{% endif %}{% if severity %}&severity={{ severity }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Anterior</a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages() %}
+              {% if page_num %}
+                {% if page_num != pagination.page %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_num }}{% if q %}&q={{ q }}{% endif %}{% if severity %}&severity={{ severity }}{% endif %}{% if status %}&status={{ status }}{% endif %}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                  <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+              {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+              {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ pagination.next_num }}{% if q %}&q={{ q }}{% endif %}{% if severity %}&severity={{ severity }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Próximo</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+      
+      {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-shield-exclamation" style="font-size: 3rem; color: #6c757d;"></i>
+        <h5 class="mt-3 text-muted">Nenhuma vulnerabilidade encontrada</h5>
+        <p class="text-muted">Use os filtros acima para refinar sua busca ou crie uma nova vulnerabilidade.</p>
+        <a href="/vulnerabilities/new" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i>Nova Vulnerabilidade
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.dashboard-container {
+  padding: 2rem;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  min-height: calc(100vh - 76px);
+}
+
+.sidebar-content {
+  padding: 2rem 1rem;
+}
+
+.sidebar-header h6 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-nav .nav-link {
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  background: var(--card);
+  color: var(--text);
+}
+
+.sidebar-nav .nav-link.active {
+  background: var(--blue-500);
+  color: white;
+}
+
+.main-content {
+  background: var(--bg);
+  min-height: calc(100vh - 76px);
+}
+
+.content-wrapper {
+  padding: 2rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.table th {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  border-color: var(--border);
+  vertical-align: middle;
+  padding: 1rem 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+  background: var(--surface);
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .content-wrapper {
+    padding: 1rem;
+  }
+  
+  .sidebar {
+    min-height: auto;
+  }
+}
+</style>
+{% endblock %}

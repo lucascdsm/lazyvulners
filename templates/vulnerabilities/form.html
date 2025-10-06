@@ -1,0 +1,342 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<h3>{{ 'Nova Vulnerabilidade' if mode=='create' else 'Editar Vulnerabilidade' }}</h3>
+<form method="post">
+  {{ form.hidden_tag() }}
+  <div class="row">
+    <div class="col-md-6 mb-3">{{ form.title.label(class_="form-label") }}{{ form.title(class_="form-control") }}</div>
+    <div class="col-md-2 mb-3">{{ form.severity.label(class_="form-label") }}{{ form.severity(class_="form-select") }}</div>
+    <div class="col-md-2 mb-3">{{ form.status.label(class_="form-label") }}{{ form.status(class_="form-select") }}</div>
+    <div class="col-md-2 mb-3">{{ form.cvss.label(class_="form-label") }}{{ form.cvss(class_="form-control") }}</div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 mb-3">{{ form.company.label(class_="form-label") }}{{ form.company(class_="form-select") }}</div>
+  </div>
+  <div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      {{ form.description.label(class_="form-label") }}
+      <button type="button" class="btn btn-primary btn-sm" id="ai-analyze-btn" onclick="analyzeWithAI()">
+        <i class="bi bi-robot me-1"></i>🤖 Analisar com AI
+      </button>
+    </div>
+    {{ form.description(class_="form-control richtext", rows=4) }}
+    <div class="form-text">
+      <i class="bi bi-lightbulb me-1"></i>
+      <strong>Dica:</strong> Descreva a vulnerabilidade e clique em "Analisar com AI" para preenchimento automático de todos os campos.
+    </div>
+  </div>
+  <div class="mb-3">{{ form.impact.label(class_="form-label") }}{{ form.impact(class_="form-control richtext", rows=3) }}</div>
+  <div class="mb-3">{{ form.likelihood.label(class_="form-label") }}{{ form.likelihood(class_="form-control richtext", rows=3) }}</div>
+  <div class="mb-3">{{ form.remediation.label(class_="form-label") }}{{ form.remediation(class_="form-control richtext", rows=3) }}</div>
+  <div class="mb-3">{{ form.references.label(class_="form-label") }}{{ form.references(class_="form-control richtext", rows=3) }}</div>
+  {{ form.submit(class_="btn btn-primary") }}
+</form>
+<script>
+function initRichText() {
+  if (!window.tinymce) return;
+  tinymce.init({
+  selector: 'textarea.richtext',
+  plugins: 'link image lists table codesample autoresize paste',
+  toolbar: 'undo redo | bold italic underline | bullist numlist | link image table | codesample',
+  menubar: false,
+  images_upload_url: '/upload/image',
+  automatic_uploads: true,
+  images_reuse_filename: false,
+    paste_data_images: true,
+  images_upload_credentials: true,
+  convert_urls: false,
+    promotion: false,
+    content_css_cors: true,
+    base_url: '/static/tinymce',
+    suffix: '.min',
+  setup: function (editor) {
+    function uploadDataImages() {
+      const imgs = editor.getBody().querySelectorAll('img');
+      imgs.forEach(function(img){
+        const src = img.getAttribute('src') || '';
+        if (src.startsWith('data:')) {
+          fetch(src).then(function(res){ return res.blob(); }).then(function(blob){
+            const formData = new FormData();
+            formData.append('file', blob, 'pasted-image.png');
+            return fetch('/upload/image', { method: 'POST', body: formData, credentials: 'same-origin' });
+          }).then(function(res){ return res.json(); }).then(function(json){
+            if (json && json.location) {
+              img.setAttribute('src', json.location);
+            }
+          }).catch(function(err){ console.error('Falha ao subir imagem colada:', err); });
+        }
+      });
+    }
+    editor.on('PastePostProcess', function(){ uploadDataImages(); });
+  },
+  images_upload_handler: function (blobInfo, success, failure) {
+    var formData = new FormData();
+    formData.append('file', blobInfo.blob(), blobInfo.filename());
+    fetch('/upload/image', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    }).then(function (res) {
+      return res.json();
+    }).then(function (json) {
+      if (json && json.location) {
+        success(json.location);
+      } else {
+        failure('Resposta inválida do servidor');
+      }
+    }).catch(function (err) {
+      failure('Falha no upload: ' + err);
+    });
+  }
+  });
+}
+// Carrega TinyMCE com fallback
+(function ensureTiny(){
+  function load(src, onload, onerror){ var s=document.createElement('script'); s.src=src; s.onload=onload; if(onerror){ s.onerror=onerror; } document.body.appendChild(s); }
+  if (window.tinymce) { initRichText(); return; }
+  // 100% offline: servir tinymce localmente em /static/tinymce/
+  load('/static/tinymce/tinymce.min.js', function(){ initRichText(); }, function(){ console.error('TinyMCE local não encontrado em /static/tinymce/tinymce.min.js'); });
+})();
+</script>
+<script>
+// Fallback: se TinyMCE não carregar ou não tratar data URLs, permitir colar imagens diretamente
+(function(){
+  function insertAtCursor(textarea, html){
+    var start = textarea.selectionStart || 0;
+    var end = textarea.selectionEnd || 0;
+    var before = textarea.value.substring(0, start);
+    var after = textarea.value.substring(end);
+    textarea.value = before + html + after;
+    var pos = start + html.length;
+    textarea.selectionStart = textarea.selectionEnd = pos;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function handlePaste(e){
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    var items = e.clipboardData.items;
+    for (var i=0;i<items.length;i++){
+      var it = items[i];
+      if (it.kind === 'file' && it.type.indexOf('image/') === 0){
+        e.preventDefault();
+        var blob = it.getAsFile();
+        var fd = new FormData();
+        fd.append('file', blob, 'pasted.png');
+        fetch('/upload/image', { method:'POST', body: fd, credentials: 'same-origin' })
+          .then(function(r){ return r.json(); })
+          .then(function(json){ if(json && json.location){ insertAtCursor(e.target, '<p><img src="'+json.location+'" /></p>'); } })
+          .catch(function(err){ console.error('Falha no upload de imagem colada (fallback):', err); });
+        break;
+      }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('textarea.richtext').forEach(function(a){ a.addEventListener('paste', handlePaste); });
+  });
+})();
+
+// AI Assistant Functions
+
+function analyzeWithAI() {
+  const title = document.querySelector('input[name="title"]').value;
+  const description = document.querySelector('textarea[name="description"]').value;
+  
+  if (!description.trim()) {
+    alert('Por favor, descreva a vulnerabilidade antes de usar o AI Assistant.');
+    return;
+  }
+  
+  const btn = document.getElementById('ai-analyze-btn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Analisando...';
+  btn.disabled = true;
+  
+  fetch('/ai-analyze', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title: title,
+      description: description
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Aplicar sugestões da AI
+      if (data.data.title) {
+        document.querySelector('input[name="title"]').value = data.data.title;
+      }
+      if (data.data.severity) {
+        document.querySelector('select[name="severity"]').value = data.data.severity;
+      }
+      if (data.data.cvss_score) {
+        document.querySelector('input[name="cvss"]').value = data.data.cvss_score;
+      }
+      if (data.data.remediation) {
+        document.querySelector('textarea[name="remediation"]').value = data.data.remediation;
+      }
+      if (data.data.impact) {
+        document.querySelector('textarea[name="impact"]').value = data.data.impact;
+      }
+      if (data.data.likelihood) {
+        document.querySelector('textarea[name="likelihood"]').value = data.data.likelihood;
+      }
+      if (data.data.references) {
+        document.querySelector('textarea[name="references"]').value = data.data.references;
+      }
+      
+      // Melhorar a descrição se disponível
+      if (data.data.improved_description) {
+        document.querySelector('textarea[name="description"]').value = data.data.improved_description;
+      }
+      
+      // Mostrar resumo executivo se disponível
+      if (data.data.executive_summary) {
+        showAIResults(data.data);
+      }
+      
+      alert('✅ Análise AI concluída! Todos os campos foram preenchidos e melhorados automaticamente.');
+    } else {
+      // Verificar se é erro de cota com retry
+      if (data.retry_after && data.retry_after > 0) {
+        showQuotaError(data.error, data.retry_after);
+      } else {
+        alert('❌ Erro na análise AI: ' + (data.error || 'Erro desconhecido'));
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Erro:', error);
+    alert('❌ Erro de conexão com o AI Assistant.');
+  })
+  .finally(() => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  });
+}
+
+function showAIResults(data) {
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
+  modal.innerHTML = `
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-robot me-2"></i>Resultado da Análise AI</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6><i class="bi bi-exclamation-triangle me-1"></i>Severidade Sugerida</h6>
+              <span class="badge bg-${getSeverityColor(data.severity)}">${data.severity}</span>
+              
+              <h6 class="mt-3"><i class="bi bi-graph-up me-1"></i>CVSS Score</h6>
+              <p><strong>${data.cvss_score}</strong></p>
+              <small class="text-muted">${data.cvss_vector}</small>
+            </div>
+            <div class="col-md-6">
+              <h6><i class="bi bi-shield-check me-1"></i>Resumo Executivo</h6>
+              <p class="small">${data.executive_summary}</p>
+            </div>
+          </div>
+          ${data.references ? `
+          <div class="row mt-3">
+            <div class="col-12">
+              <h6><i class="bi bi-book me-1"></i>Referências Técnicas</h6>
+              <p class="small">${data.references}</p>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  const bsModal = new bootstrap.Modal(modal);
+  bsModal.show();
+  
+  modal.addEventListener('hidden.bs.modal', () => {
+    document.body.removeChild(modal);
+  });
+}
+
+function getSeverityColor(severity) {
+  switch(severity?.toLowerCase()) {
+    case 'critical': return 'danger';
+    case 'high': return 'warning';
+    case 'medium': return 'info';
+    case 'low': return 'secondary';
+    default: return 'light';
+  }
+}
+
+function showQuotaError(message, retrySeconds) {
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
+  modal.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Limite de Cota Excedido</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <i class="bi bi-clock me-2"></i>
+            <strong>Limite de cota gratuita excedido</strong>
+          </div>
+          <p>${message}</p>
+          <div class="text-center">
+            <div class="spinner-border text-warning me-2" role="status">
+              <span class="visually-hidden">Aguardando...</span>
+            </div>
+            <span id="countdown">Aguardando ${retrySeconds} segundos...</span>
+          </div>
+          <div class="mt-3">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              <strong>Dica:</strong> A cota gratuita do Google AI Studio é limitada. 
+              Considere fazer upgrade do plano para uso ilimitado.
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" class="btn btn-outline-info">
+            <i class="bi bi-external-link me-1"></i>Ver Limites
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  const bsModal = new bootstrap.Modal(modal);
+  bsModal.show();
+  
+  // Contador regressivo
+  let countdown = retrySeconds;
+  const countdownElement = modal.querySelector('#countdown');
+  const interval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      countdownElement.textContent = `Aguardando ${countdown} segundos...`;
+    } else {
+      countdownElement.textContent = 'Pronto para tentar novamente!';
+      clearInterval(interval);
+    }
+  }, 1000);
+  
+  modal.addEventListener('hidden.bs.modal', () => {
+    clearInterval(interval);
+    document.body.removeChild(modal);
+  });
+}
+</script>
+{% endblock %}

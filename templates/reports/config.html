@@ -1,0 +1,157 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Configurar Relatórios</h2>
+      <p class="text-muted mb-0">
+        <i class="bi bi-shield-lock me-1"></i>
+        Empresa: <strong>{{ selected_company }}</strong>
+      </p>
+    </div>
+    <div>
+      <a href="/reports" class="btn btn-outline-light">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-sliders"></i> Preferências</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {{ form.hidden_tag() }}
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.template_name.label.text }}</label>
+                {{ form.template_name(class_='form-select') }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">{{ form.primary_color.label.text }}</label>
+                {{ form.primary_color(class_='form-control', placeholder='#01317d') }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">{{ form.secondary_color.label.text }}</label>
+                {{ form.secondary_color(class_='form-control', placeholder='#3b82f6') }}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">{{ form.cover_background_url.label.text }}</label>
+                {{ form.cover_background_url(class_='form-control', placeholder='https://.../cover.png') }}
+                <small class="text-muted">Use o botão de upload nas prévias para enviar imagens e cole aqui a URL gerada.</small>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">{{ form.page_background_url.label.text }}</label>
+                {{ form.page_background_url(class_='form-control', placeholder='https://.../page-bg.png') }}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">{{ form.header_logo_url.label.text }}</label>
+                {{ form.header_logo_url(class_='form-control', placeholder='https://.../logo.png') }}
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-check mt-2">
+                  {{ form.include_executive(class_='form-check-input', id='includeExec') }}
+                  <label for="includeExec" class="form-check-label">{{ form.include_executive.label.text }}</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check mt-2">
+                  {{ form.include_technical(class_='form-check-input', id='includeTech') }}
+                  <label for="includeTech" class="form-check-label">{{ form.include_technical.label.text }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+              {{ form.submit(class_='btn btn-primary') }}
+              <a href="/reports" class="btn btn-outline-light">Cancelar</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-eye"></i> Pré-visualização</h5>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="uploadImageToField('cover')"><i class="bi bi-upload"></i> Capa</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="uploadImageToField('page')"><i class="bi bi-upload"></i> Página</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="uploadImageToField('logo')"><i class="bi bi-upload"></i> Logo</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="border rounded p-3 rich-preview" id="previewArea" style="min-height: 280px; background: rgba(255,255,255,0.02);">
+            <div class="text-muted">Ajuste cores e fundos para ver a prévia aqui.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function uploadImageToField(target){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if(!file) return;
+    const data = new FormData();
+    data.append('file', file);
+    const resp = await fetch('/upload/image', { method: 'POST', body: data });
+    const json = await resp.json();
+    if(json.location){
+      if(target==='cover') document.getElementById('cover_background_url').value = json.location;
+      if(target==='page') document.getElementById('page_background_url').value = json.location;
+      if(target==='logo') document.getElementById('header_logo_url').value = json.location;
+      updatePreview();
+    }
+  };
+  input.click();
+}
+
+function updatePreview(){
+  const area = document.getElementById('previewArea');
+  const cover = document.getElementById('cover_background_url').value;
+  const page = document.getElementById('page_background_url').value;
+  const logo = document.getElementById('header_logo_url').value;
+  const primary = document.getElementById('primary_color').value || '#01317d';
+  const secondary = document.getElementById('secondary_color').value || '#3b82f6';
+  area.innerHTML = `
+    <div style="background-image:url('${cover}'); background-size:cover; background-position:center; border-radius:8px; padding:16px; min-height:120px; display:flex; align-items:flex-end;">
+      <div style="background:rgba(0,0,0,0.35); padding:6px 10px; border-radius:6px; color:#fff;">Capa</div>
+    </div>
+    <div class="mt-3 p-3" style="border:1px solid rgba(255,255,255,0.1); border-radius:8px; background-image:url('${page}'); background-size:cover; background-position:center;">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        ${logo ? `<img src="${logo}" alt="logo" style="height:28px;">` : ''}
+        <strong style="color:${secondary}">Cabeçalho</strong>
+      </div>
+      <div style="height:6px; width:100%; background:${primary}; border-radius:999px;" ></div>
+      <div class="mt-3 text-muted">Conteúdo exemplo...</div>
+    </div>
+  `;
+}
+
+['cover_background_url','page_background_url','header_logo_url','primary_color','secondary_color']
+  .forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.addEventListener('input', updatePreview); }
+  });
+
+document.addEventListener('DOMContentLoaded', updatePreview);
+</script>
+{% endblock %}
+
+

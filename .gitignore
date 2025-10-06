@@ -1,0 +1,58 @@
+# LazyVulners - Arquivos a serem ignorados pelo Git
+
+# Banco de dados
+instance/
+*.sqlite
+*.db
+
+# Logs
+*.log
+logs/
+
+# Uploads
+static/uploads/
+uploads/
+
+# Backups
+backups/
+*.backup
+
+# Ambiente virtual
+venv/
+env/
+.venv/
+
+# Arquivos de configuração sensíveis
+.env
+.env.local
+.env.production
+config.ini
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Arquivos de credenciais
+credentials.txt
+credentials_generated.txt
+api_keys.txt
+
+# Arquivos de deploy
+deploy.log
+deployment.log

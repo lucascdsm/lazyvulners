@@ -1,0 +1,269 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1">Backup e Export</h2>
+        <p class="text-muted mb-0">
+          <i class="bi bi-shield-lock me-1"></i>
+          Ambiente Isolado: <strong>{{ selected_company }}</strong>
+        </p>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-success">
+          <i class="bi bi-check-circle me-1"></i>Dados Seguros
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards de Export -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="backup-card">
+        <div class="backup-icon bg-primary">
+          <i class="bi bi-file-earmark-code"></i>
+        </div>
+        <div class="backup-content">
+          <h5 class="backup-title">Export JSON</h5>
+          <p class="backup-description">
+            Exporte todas as vulnerabilidades em formato JSON para backup ou migração.
+          </p>
+          <a href="/backup/vulnerabilities.json" class="btn btn-primary w-100">
+            <i class="bi bi-download me-1"></i>Baixar JSON
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="backup-card">
+        <div class="backup-icon bg-success">
+          <i class="bi bi-file-earmark-spreadsheet"></i>
+        </div>
+        <div class="backup-content">
+          <h5 class="backup-title">Export CSV</h5>
+          <p class="backup-description">
+            Exporte as vulnerabilidades em formato CSV para análise em Excel.
+          </p>
+          <a href="/backup/vulnerabilities.csv" class="btn btn-success w-100">
+            <i class="bi bi-download me-1"></i>Baixar CSV
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="backup-card">
+        <div class="backup-icon bg-warning">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="backup-content">
+          <h5 class="backup-title">Templates JSON</h5>
+          <p class="backup-description">
+            Exporte todos os templates de relatório em formato JSON.
+          </p>
+          <a href="/backup/templates.json" class="btn btn-warning w-100">
+            <i class="bi bi-download me-1"></i>Baixar Templates
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="backup-card">
+        <div class="backup-icon bg-info">
+          <i class="bi bi-archive"></i>
+        </div>
+        <div class="backup-content">
+          <h5 class="backup-title">Backup Completo</h5>
+          <p class="backup-description">
+            Faça backup de todos os dados da empresa selecionada.
+          </p>
+          <button class="btn btn-info w-100" onclick="downloadAll()">
+            <i class="bi bi-download me-1"></i>Backup Completo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informações de Segurança -->
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-shield-check me-2"></i>Segurança dos Dados
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h6 class="mb-1 text-success">
+            <i class="bi bi-shield-check me-2"></i>
+            Backup Seguro e Isolado
+          </h6>
+          <p class="text-muted mb-0">
+            Todos os backups contêm apenas dados da empresa <strong>{{ selected_company }}</strong>. 
+            Os arquivos são gerados em tempo real e não são armazenados no servidor.
+          </p>
+        </div>
+        <div class="col-md-4 text-end">
+          <span class="badge bg-success fs-6">
+            <i class="bi bi-lock me-1"></i>Dados Seguros
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function downloadAll() {
+    // Download JSON
+    window.open('/backup/vulnerabilities.json', '_blank');
+    
+    // Download CSV
+    setTimeout(() => {
+        window.open('/backup/vulnerabilities.csv', '_blank');
+    }, 1000);
+    
+    // Download Templates
+    setTimeout(() => {
+        window.open('/backup/templates.json', '_blank');
+    }, 2000);
+}
+</script>
+
+<style>
+.dashboard-container {
+  padding: 2rem;
+}
+
+.backup-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.backup-card:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,.35);
+  transform: translateY(-2px);
+}
+
+.backup-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.backup-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.backup-title {
+  color: var(--text);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.backup-description {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  min-height: calc(100vh - 76px);
+}
+
+.sidebar-content {
+  padding: 2rem 1rem;
+}
+
+.sidebar-header h6 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-nav .nav-link {
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  background: var(--card);
+  color: var(--text);
+}
+
+.sidebar-nav .nav-link.active {
+  background: var(--blue-500);
+  color: white;
+}
+
+.main-content {
+  background: var(--bg);
+  min-height: calc(100vh - 76px);
+}
+
+.content-wrapper {
+  padding: 2rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .content-wrapper {
+    padding: 1rem;
+  }
+  
+  .sidebar {
+    min-height: auto;
+  }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}AI Assistant - Configuração{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-robot me-2"></i>AI Vulnerability Assistant</h2>
+                <a href="{{ url_for('main.ai_tutorial') }}" class="btn btn-outline-info">
+                    <i class="bi bi-question-circle me-1"></i>Tutorial
+                </a>
+            </div>
+
+            <!-- Status do AI Assistant -->
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle me-2"></i>Status do AI Assistant</h5>
+                {% if ai_config.ai_enabled and ai_config.gemini_api_key %}
+                    <span class="badge bg-success">Ativo</span> - AI Assistant configurado e funcionando
+                {% else %}
+                    <span class="badge bg-warning">Inativo</span> - Configure a API Key do Gemini para ativar
+                {% endif %}
+            </div>
+
+            <!-- Formulário de Configuração -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear me-2"></i>Configurações do AI Assistant</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- API Key -->
+                        <div class="mb-4">
+                            <label for="{{ form.gemini_api_key.id }}" class="form-label">
+                                <i class="bi bi-key me-1"></i>Gemini API Key
+                            </label>
+                            <div class="input-group">
+                                {{ form.gemini_api_key(class="form-control") }}
+                                <button type="button" class="btn btn-outline-info" onclick="testConnection()">
+                                    <i class="bi bi-wifi me-1"></i>Testar
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-decoration-none">
+                                    Obtenha sua API Key gratuita no Google AI Studio
+                                </a>
+                            </div>
+                            <div id="connection-status" class="mt-2"></div>
+                        </div>
+
+                        <!-- Configurações de Funcionalidades -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {{ form.ai_enabled(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.ai_enabled.id }}">
+                                        <strong>Ativar AI Assistant</strong>
+                                        <br><small class="text-muted">Habilita todas as funcionalidades de IA</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    {{ form.auto_suggest_severity(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.auto_suggest_severity.id }}">
+                                        <strong>Sugerir Severidade</strong>
+                                        <br><small class="text-muted">Analisa e sugere Critical/High/Medium/Low automaticamente</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    {{ form.auto_suggest_cvss(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.auto_suggest_cvss.id }}">
+                                        <strong>Sugerir CVSS</strong>
+                                        <br><small class="text-muted">Calcula score CVSS e vetor automaticamente</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {{ form.auto_suggest_remediation(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.auto_suggest_remediation.id }}">
+                                        <strong>Sugerir Remediação</strong>
+                                        <br><small class="text-muted">Gera sugestões técnicas de correção</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    {{ form.auto_detect_similar(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.auto_detect_similar.id }}">
+                                        <strong>Detectar Similares</strong>
+                                        <br><small class="text-muted">Identifica vulnerabilidades similares no banco</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    {{ form.auto_generate_summary(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.auto_generate_summary.id }}">
+                                        <strong>Resumos Executivos</strong>
+                                        <br><small class="text-muted">Gera resumos automáticos para gestores</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="d-flex gap-2">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Funcionalidades do AI Assistant -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-brain text-primary" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-3">Análise Inteligente</h5>
+                            <p class="card-text">IA analisa descrições e sugere severidade, CVSS e remediação automaticamente.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-search text-success" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-3">Detecção de Padrões</h5>
+                            <p class="card-text">Identifica vulnerabilidades similares e padrões recorrentes no seu banco de dados.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-text text-info" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-3">Resumos Executivos</h5>
+                            <p class="card-text">Gera resumos automáticos para apresentar aos gestores e clientes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testConnection() {
+    const apiKey = document.querySelector('input[name="gemini_api_key"]').value;
+    const statusDiv = document.getElementById('connection-status');
+    const testBtn = document.querySelector('button[onclick="testConnection()"]');
+    
+    if (!apiKey.trim()) {
+        statusDiv.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-1"></i>Digite uma API Key primeiro</div>';
+        return;
+    }
+    
+    // Mostrar loading
+    testBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Testando...';
+    testBtn.disabled = true;
+    statusDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split me-1"></i>Testando conexão...</div>';
+    
+    fetch('/ai-test', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            api_key: apiKey
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let modelInfo = '';
+            if (data.model) {
+                modelInfo = `<br><small class="text-muted">Modelo: ${data.model}</small>`;
+            }
+            if (data.available_models) {
+                modelInfo += `<br><small class="text-muted">Modelos disponíveis: ${data.available_models}</small>`;
+            }
+            statusDiv.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-1"></i>✅ ${data.message}${modelInfo}</div>`;
+        } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle me-1"></i>❌ ${data.error}</div>`;
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        statusDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle me-1"></i>❌ Erro de conexão</div>';
+    })
+    .finally(() => {
+        testBtn.innerHTML = '<i class="bi bi-wifi me-1"></i>Testar';
+        testBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

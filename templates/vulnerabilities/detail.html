@@ -1,0 +1,164 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+  <h3>{{ v.title }}</h3>
+  <div>
+    <a class="btn btn-secondary" href="/export/vulnerability/{{ v.id }}.pdf">PDF</a>
+    <a class="btn btn-warning" href="/vulnerabilities/{{ v.id }}/edit">Editar</a>
+    {% if v.ai_enhanced %}
+    <a class="btn btn-info" href="/vulnerabilities/{{ v.id }}/ai-suggestions">Sugestões IA</a>
+    {% endif %}
+    {% if current_user.role == 'admin' %}
+    <a class="btn btn-info" href="/vulnerabilities/{{ v.id }}/access">Gerenciar acesso</a>
+    {% endif %}
+    <form method="post" action="/vulnerabilities/{{ v.id }}/delete" class="d-inline" onsubmit="return confirm('Confirmar exclusão?')">
+      <button class="btn btn-danger">Excluir</button>
+    </form>
+  </div>
+</div>
+<div class="mb-2">
+  <b>Severidade:</b> {{ v.severity }} | 
+  <b>Status:</b> {{ v.status }} | 
+  <b>CVSS:</b> {{ v.cvss or '' }} | 
+  <b>Categoria:</b> {{ v.category or 'N/A' }}
+  {% if v.ai_enhanced %}
+  | <span class="badge bg-success">✓ Melhorado com IA</span>
+  {% endif %}
+</div>
+<div class="mb-2"><b>Descrição</b><div class="border p-2">{{ (v.description or '')|safe }}</div></div>
+<div class="mb-2"><b>Impacto</b><div class="border p-2">{{ (v.impact or '')|safe }}</div></div>
+<div class="mb-2"><b>Probabilidade</b><div class="border p-2">{{ (v.likelihood or '')|safe }}</div></div>
+<div class="mb-2"><b>Remediação</b><div class="border p-2">{{ (v.remediation or '')|safe }}</div></div>
+<div class="mb-2"><b>Referências</b><div class="border p-2">{{ (v.references or '')|safe }}</div></div>
+<div class="mb-2"><b>Comentários</b>
+  <div class="card p-2 mb-2">
+    <form method="post" action="/vulnerabilities/{{ v.id }}/comments">
+      {{ form.hidden_tag() }}
+      {{ form.body(class_='form-control richtext', rows=3, placeholder='Escreva um comentário...') }}
+      <div class="text-end mt-2">{{ form.submit(class_='btn btn-primary') }}</div>
+    </form>
+  </div>
+  <div class="list-group">
+    {% for c in comments %}
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between">
+        <div><b>{{ c.user.username }}</b> <span class="text-muted">{{ c.created_at }}</span></div>
+        <form method="post" action="/comments/{{ c.id }}/like">
+          <button class="btn btn-sm btn-outline-primary">Curtir ({{ c.likes.count() }})</button>
+        </form>
+      </div>
+      <div class="mt-2">{{ c.body|safe }}</div>
+      {% if c.likes.count() > 0 %}
+      <div class="mt-1 text-muted small">Curtido por: {% for l in c.likes %}{{ l.user.username }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="list-group-item">Sem comentários ainda.</div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+function initRichText() {
+  if (!window.tinymce) return;
+  tinymce.init({
+  selector: 'textarea.richtext',
+  plugins: 'link image lists table codesample autoresize paste',
+  toolbar: 'undo redo | bold italic underline | bullist numlist | link image table | codesample',
+  menubar: false,
+  images_upload_url: '/upload/image',
+  automatic_uploads: true,
+  images_reuse_filename: false,
+    paste_data_images: true,
+  images_upload_credentials: true,
+  convert_urls: false,
+    promotion: false,
+    content_css_cors: true,
+    base_url: '/static/tinymce',
+    suffix: '.min',
+  setup: function (editor) {
+    function uploadDataImages() {
+      const imgs = editor.getBody().querySelectorAll('img');
+      imgs.forEach(function(img){
+        const src = img.getAttribute('src') || '';
+        if (src.startsWith('data:')) {
+          fetch(src).then(function(res){ return res.blob(); }).then(function(blob){
+            const formData = new FormData();
+            formData.append('file', blob, 'pasted-image.png');
+            return fetch('/upload/image', { method: 'POST', body: formData, credentials: 'same-origin' });
+          }).then(function(res){ return res.json(); }).then(function(json){
+            if (json && json.location) {
+              img.setAttribute('src', json.location);
+            }
+          }).catch(function(err){ console.error('Falha ao subir imagem colada:', err); });
+        }
+      });
+    }
+    editor.on('PastePostProcess', function(){ uploadDataImages(); });
+  },
+  images_upload_handler: function (blobInfo, success, failure) {
+    var formData = new FormData();
+    formData.append('file', blobInfo.blob(), blobInfo.filename());
+    fetch('/upload/image', {
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    }).then(function (res) {
+      return res.json();
+    }).then(function (json) {
+      if (json && json.location) {
+        success(json.location);
+      } else {
+        failure('Resposta inválida do servidor');
+      }
+    }).catch(function (err) {
+      failure('Falha no upload: ' + err);
+    });
+  }
+  });
+}
+// Carrega TinyMCE com fallback
+(function ensureTiny(){
+  function load(src, onload, onerror){ var s=document.createElement('script'); s.src=src; s.onload=onload; if(onerror){ s.onerror=onerror; } document.body.appendChild(s); }
+  if (window.tinymce) { initRichText(); return; }
+  // 100% offline: servir tinymce localmente em /static/tinymce/
+  load('/static/tinymce/tinymce.min.js', function(){ initRichText(); }, function(){ console.error('TinyMCE local não encontrado em /static/tinymce/tinymce.min.js'); });
+})();
+</script>
+<script>
+// Fallback: se TinyMCE não carregar, permitir colar imagens diretamente no textarea
+(function(){
+  function insertAtCursor(textarea, text){
+    var start = textarea.selectionStart || 0;
+    var end = textarea.selectionEnd || 0;
+    var before = textarea.value.substring(0, start);
+    var after = textarea.value.substring(end);
+    textarea.value = before + text + after;
+    var pos = start + text.length;
+    textarea.selectionStart = textarea.selectionEnd = pos;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function handlePaste(e){
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    var items = e.clipboardData.items;
+    for (var i=0;i<items.length;i++){
+      var it = items[i];
+      if (it.kind === 'file' && it.type.indexOf('image/') === 0){
+        e.preventDefault();
+        var blob = it.getAsFile();
+        var fd = new FormData();
+        fd.append('file', blob, 'pasted.png');
+        fetch('/upload/image', { method:'POST', body: fd, credentials: 'same-origin' })
+          .then(function(r){ return r.json(); })
+          .then(function(json){ if(json && json.location){ insertAtCursor(e.target, '<p><img src="'+json.location+'" /></p>'); } })
+          .catch(function(err){ console.error('Falha no upload de imagem colada (fallback):', err); });
+        break;
+      }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var areas = document.querySelectorAll('textarea.richtext');
+    areas.forEach(function(a){ a.addEventListener('paste', handlePaste); });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}AI Assistant - Tutorial{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-robot me-2"></i>Tutorial do AI Assistant</h2>
+                <a href="{{ url_for('main.ai_config') }}" class="btn btn-primary">
+                    <i class="bi bi-gear me-1"></i>Configurar AI
+                </a>
+            </div>
+
+            <!-- Introdução -->
+            <div class="alert alert-primary">
+                <h5><i class="bi bi-lightbulb me-2"></i>O que é o AI Vulnerability Assistant?</h5>
+                <p class="mb-0">
+                    O AI Assistant é um sistema inteligente que usa Google Gemini para analisar vulnerabilidades 
+                    e sugerir automaticamente severidade, CVSS, remediação e detectar padrões similares.
+                </p>
+            </div>
+
+            <!-- Passo a Passo -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-list-ol me-2"></i>Como Configurar</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="step-by-step">
+                                <!-- Passo 1 -->
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <strong>1</strong>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6>Obter API Key do Google Gemini</h6>
+                                        <ol>
+                                            <li>Acesse <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-decoration-none">Google AI Studio</a></li>
+                                            <li>Faça login com sua conta Google</li>
+                                            <li>Clique em "Create API Key"</li>
+                                            <li>Copie a chave gerada</li>
+                                        </ol>
+                                        <div class="alert alert-info mt-2">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            <strong>Gratuito:</strong> O Gemini oferece uso gratuito com limites generosos para uso pessoal e profissional.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Passo 2 -->
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <strong>2</strong>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                <h6>Configurar no LazyVulners</h6>
+                                <ol>
+                                    <li>Vá para <strong>AI Assistant > Configuração</strong></li>
+                                    <li>Cole sua API Key no campo "Gemini API Key"</li>
+                                    <li><strong>Clique em "Testar"</strong> para verificar se a API Key funciona</li>
+                                    <li>Ative as funcionalidades desejadas</li>
+                                    <li>Clique em "Salvar Configurações AI"</li>
+                                </ol>
+                                <div class="alert alert-success mt-2">
+                                    <i class="bi bi-lightbulb me-1"></i>
+                                    <strong>Dica:</strong> Use o botão "Testar" para verificar se sua API Key está funcionando antes de salvar.
+                                </div>
+                                    </div>
+                                </div>
+
+                                <!-- Passo 3 -->
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <strong>3</strong>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6>Usar o AI Assistant</h6>
+                                        <ol>
+                                            <li>Ao criar uma nova vulnerabilidade, descreva o problema</li>
+                                            <li>Clique no botão <strong>"🤖 Analisar com AI"</strong></li>
+                                            <li>O sistema sugerirá automaticamente:</li>
+                                            <ul>
+                                                <li>Severidade (Critical, High, Medium, Low)</li>
+                                                <li>Score CVSS e vetor</li>
+                                                <li>Sugestões de remediação</li>
+                                                <li>Vulnerabilidades similares</li>
+                                            </ul>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Funcionalidades -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6><i class="bi bi-magic me-2"></i>Funcionalidades</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <small>Análise automática de severidade</small>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <small>Cálculo automático de CVSS</small>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <small>Sugestões de remediação</small>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <small>Detecção de vulnerabilidades similares</small>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <small>Resumos executivos automáticos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exemplo de Uso -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-code me-2"></i>Exemplo de Uso</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Descrição:</strong></p>
+                            <p class="small text-muted">
+                                "SQL Injection encontrado no parâmetro 'id' da URL /user.php. 
+                                O parâmetro é usado diretamente na query sem sanitização."
+                            </p>
+                            
+                            <p><strong>AI Sugere:</strong></p>
+                            <ul class="small">
+                                <li><strong>Severidade:</strong> High</li>
+                                <li><strong>CVSS:</strong> 8.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)</li>
+                                <li><strong>Remediação:</strong> Usar prepared statements</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dicas e Melhores Práticas -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb me-2"></i>Dicas e Melhores Práticas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle text-success me-2"></i>Para Melhores Resultados:</h6>
+                            <ul>
+                                <li>Seja específico na descrição da vulnerabilidade</li>
+                                <li>Inclua detalhes técnicos (URLs, parâmetros, etc.)</li>
+                                <li>Mencione o tipo de aplicação (web, mobile, etc.)</li>
+                                <li>Descreva o impacto observado</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-exclamation-triangle text-warning me-2"></i>Importante:</h6>
+                            <ul>
+                                <li>Revise sempre as sugestões da IA</li>
+                                <li>Use como ponto de partida, não como resposta final</li>
+                                <li>Combine com seu conhecimento técnico</li>
+                                <li>Teste as sugestões de remediação</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suporte -->
+            <div class="alert alert-light mt-4">
+                <h6><i class="bi bi-question-circle me-2"></i>Precisa de Ajuda?</h6>
+                <p class="mb-0">
+                    Se tiver dúvidas sobre o AI Assistant, consulte a documentação do 
+                    <a href="https://ai.google.dev/docs" target="_blank" class="text-decoration-none">Google Gemini</a> 
+                    ou entre em contato com o suporte.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

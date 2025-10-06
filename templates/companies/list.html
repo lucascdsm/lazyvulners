@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+  <h3>Gerenciar Empresas</h3>
+  <div>
+    <a href="/companies/new" class="btn btn-success">Nova Empresa</a>
+    <a href="/" class="btn btn-secondary">Voltar</a>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body">
+    {% if companies %}
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>Endereço</th>
+              <th>Criada em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for company in companies %}
+            <tr>
+              <td>
+                <strong>{{ company.name }}</strong>
+                {% if company.description %}
+                  <br><small class="text-muted">{{ company.description[:100] }}{% if company.description|length > 100 %}...{% endif %}</small>
+                {% endif %}
+              </td>
+              <td>{{ company.contact_email or '-' }}</td>
+              <td>{{ company.contact_phone or '-' }}</td>
+              <td>
+                {% if company.address %}
+                  {{ company.address[:50] }}{% if company.address|length > 50 %}...{% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>{{ company.created_at.strftime('%d/%m/%Y') }}</td>
+              <td>
+                <div class="btn-group" role="group">
+                  <a href="/companies/{{ company.id }}/edit" class="btn btn-sm btn-primary" title="Editar empresa">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button type="button" class="btn btn-sm btn-warning" onclick="renameCompany({{ company.id }}, '{{ company.name }}')" title="Renomear empresa">
+                    <i class="bi bi-tag"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-danger" onclick="deleteCompany({{ company.id }}, '{{ company.name }}')" title="Excluir empresa">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-4">
+        <p class="text-muted">Nenhuma empresa cadastrada.</p>
+        <a href="/companies/new" class="btn btn-primary">Criar primeira empresa</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+<!-- Formulário oculto para exclusão -->
+<form id="deleteForm" method="POST" style="display: none;">
+  <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<script>
+function deleteCompany(companyId, companyName) {
+  if (confirm(`Tem certeza que deseja excluir a empresa "${companyName}"?`)) {
+    const form = document.getElementById('deleteForm');
+    form.action = `/companies/${companyId}/delete`;
+    form.submit();
+  }
+}
+
+function renameCompany(companyId, currentName) {
+  const newName = prompt(`Digite o novo nome para a empresa "${currentName}":`, currentName);
+  if (newName && newName.trim() !== '' && newName !== currentName) {
+    // Criar formulário para renomear
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/companies/${companyId}/rename`;
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'name';
+    input.value = newName.trim();
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script>
+{% endblock %}

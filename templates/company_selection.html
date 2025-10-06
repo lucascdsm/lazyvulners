@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+      <div class="text-center mb-5">
+        <h1 class="display-4 text-primary mb-3">Selecionar Empresa</h1>
+        {% if current_user.role == 'admin' %}
+        <p class="lead text-white">Escolha a empresa que você deseja gerenciar</p>
+        {% else %}
+        <p class="lead text-white">Sua empresa: <strong>{{ current_user.company }}</strong></p>
+        {% endif %}
+      </div>
+
+      {% if companies %}
+        <div class="row g-4">
+          {% for company in companies %}
+          <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0 company-card" onclick="selectCompany({{ company.id }})">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h5 class="card-title mb-0 text-primary">{{ company.name }}</h5>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu" style="z-index: 1050;">
+                      <li><a class="dropdown-item" href="/companies/{{ company.id }}/edit">
+                        <i class="bi bi-pencil me-2"></i>Editar
+                      </a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item text-danger" href="#" onclick="deleteCompany({{ company.id }}, '{{ company.name }}')">
+                        <i class="bi bi-trash me-2"></i>Excluir
+                      </a></li>
+                    </ul>
+                  </div>
+                </div>
+                
+                {% if company.description %}
+                  <p class="card-text text-muted small flex-grow-1">{{ company.description[:100] }}{% if company.description|length > 100 %}...{% endif %}</p>
+                {% endif %}
+                
+                <div class="mt-auto">
+                  <div class="row text-center">
+                    {% if company.contact_email %}
+                    <div class="col-6">
+                      <small class="text-muted d-block">Email</small>
+                      <small class="text-primary">{{ company.contact_email }}</small>
+                    </div>
+                    {% endif %}
+                    {% if company.contact_phone %}
+                    <div class="col-6">
+                      <small class="text-muted d-block">Telefone</small>
+                      <small class="text-primary">{{ company.contact_phone }}</small>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer bg-transparent border-0 text-center">
+                <button class="btn btn-primary btn-lg w-100" onclick="event.stopPropagation(); selectCompany({{ company.id }})">
+                  <i class="bi bi-arrow-right-circle me-2"></i>Selecionar
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-5">
+          <div class="mb-4">
+            <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>
+          </div>
+          <h4 class="text-muted mb-3">Nenhuma empresa cadastrada</h4>
+          <p class="text-muted mb-4">Você precisa criar pelo menos uma empresa para começar a usar o sistema.</p>
+          <a href="/companies/new" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Criar Primeira Empresa
+          </a>
+        </div>
+      {% endif %}
+
+      {% if companies %}
+        <div class="text-center mt-5">
+          <a href="/companies/new" class="btn btn-outline-primary">
+            <i class="bi bi-plus-circle me-2"></i>Nova Empresa
+          </a>
+          <a href="/companies" class="btn btn-outline-secondary ms-2">
+            <i class="bi bi-gear me-2"></i>Gerenciar Empresas
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Formulário oculto para seleção -->
+<form id="companyForm" method="POST" action="/select-company" style="display: none;">
+  <input type="hidden" name="company_id" id="companyId">
+</form>
+
+<!-- Formulário oculto para exclusão -->
+<form id="deleteForm" method="POST" style="display: none;">
+  <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<script>
+function selectCompany(companyId) {
+  document.getElementById('companyId').value = companyId;
+  document.getElementById('companyForm').submit();
+}
+
+function deleteCompany(companyId, companyName) {
+  if (confirm(`Tem certeza que deseja excluir a empresa "${companyName}"?`)) {
+    const form = document.getElementById('deleteForm');
+    form.action = `/companies/${companyId}/delete`;
+    form.submit();
+  }
+}
+
+function renameCompany(companyId, currentName) {
+  const newName = prompt(`Digite o novo nome para a empresa "${currentName}":`, currentName);
+  if (newName && newName.trim() !== '' && newName !== currentName) {
+    // Criar formulário para renomear
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/companies/${companyId}/rename`;
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'name';
+    input.value = newName.trim();
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+// Adicionar efeitos visuais aos cards
+document.addEventListener('DOMContentLoaded', function() {
+  const cards = document.querySelectorAll('.company-card');
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-5px)';
+      this.style.transition = 'transform 0.3s ease';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+    });
+  });
+});
+</script>
+
+<style>
+.company-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 15px;
+}
+
+.company-card:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+/* Garantir que o dropdown apareça acima de outros elementos */
+.dropdown-menu {
+  z-index: 1050 !important;
+  position: absolute !important;
+}
+
+/* Melhorar o posicionamento dos cards */
+.company-card {
+  position: relative;
+  z-index: 1;
+}
+
+.company-card:hover {
+  z-index: 2;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Gerenciar acesso - {{ v.title }}</h3>
+<div class="card p-3 mb-3">
+  <form method="post" action="/vulnerabilities/{{ v.id }}/access/add" class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label">Conceder para usuário</label>
+      <select name="user_id" class="form-select">
+        {% for u in users %}
+        <option value="{{ u.id }}">{{ u.username }} ({{ u.role }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary">Conceder</button>
+    </div>
+    <div class="col-md-4 text-end">
+      <a class="btn btn-secondary" href="/vulnerabilities/{{ v.id }}">Voltar</a>
+    </div>
+  </form>
+  <div class="mt-3">
+    <b>Acessos atuais</b>
+    <table class="table table-sm">
+      <thead><tr><th>Usuário</th><th>Papel</th><th></th></tr></thead>
+      <tbody>
+        {% for a in access %}
+        <tr>
+          <td>{{ a.user.username }}</td>
+          <td>{{ a.user.role }}</td>
+          <td>
+            <form method="post" action="/vulnerabilities/{{ v.id }}/access/{{ a.id }}/remove" onsubmit="return confirm('Revogar acesso?')">
+              <button class="btn btn-sm btn-danger">Remover</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">Sem acessos concedidos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+

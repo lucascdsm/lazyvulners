@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>{% if mode=='create' %}Novo Usuário{% else %}Editar Usuário{% endif %}</h3>
+<form method="post">
+  {{ form.hidden_tag() }}
+  <div class="mb-3">
+    {{ form.username.label(class_='form-label text-white') }}
+    {{ form.username(class_='form-control text-white bg-dark border-secondary') }}
+    {% for e in form.username.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </div>
+  <div class="mb-3">
+    {{ form.role.label(class_='form-label text-white') }}
+    {{ form.role(class_='form-select text-white bg-dark border-secondary') }}
+    {% for e in form.role.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </div>
+  <div class="mb-3">
+    {{ form.company.label(class_='form-label text-white') }}
+    {{ form.company(class_='form-select text-white bg-dark border-secondary') }}
+  </div>
+  {% if mode=='create' %}
+  <div class="mb-3">
+    {{ form.password.label(class_='form-label text-white') }}
+    {{ form.password(class_='form-control text-white bg-dark border-secondary') }}
+    {% for e in form.password.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </div>
+  <div class="mb-3">
+    {{ form.password_confirm.label(class_='form-label text-white') }}
+    {{ form.password_confirm(class_='form-control text-white bg-dark border-secondary') }}
+    {% for e in form.password_confirm.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </div>
+  {% endif %}
+  {{ form.submit(class_='btn btn-primary') }}
+  <a class="btn btn-secondary" href="/users/">Voltar</a>
+</form>
+{% endblock %}
+
+
