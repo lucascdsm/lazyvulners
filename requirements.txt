@@ -1,35 +1,31 @@
-﻿# LazyVulners - Sistema de Gerenciamento de Vulnerabilidades
+# LazyVulners - Sistema de Gerenciamento de Vulnerabilidades
 # Dependências Python
 
 # Framework Web
-Flask==2.3.3
-Flask-SQLAlchemy==3.0.5
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
-Flask-WTF==1.1.1
-Flask-Talisman==1.1.0
+Flask-WTF==1.2.1
 
 # Banco de Dados
-SQLAlchemy==2.0.21
+SQLAlchemy==2.0.36
 
 # Autenticação e Segurança
-Werkzeug==2.3.7
-WTForms==3.0.1
+Werkzeug==3.0.4
+WTForms==3.1.2
 
 # Geração de PDFs
-ReportLab==4.0.4
-Pillow==10.0.0
-
-# Processamento de Imagens
-Pillow==10.0.0
+ReportLab==4.2.2
+Pillow==11.3.0
 
 # Utilitários
-python-dateutil==2.8.2
+python-dateutil==2.9.0
 
 # AI Assistant - Gemini
-google-generativeai==0.3.2
+google-generativeai==0.8.3
 
 # Desenvolvimento (opcional)
-# pytest==7.4.2
-# pytest-flask==1.2.0
-# black==23.7.0
-# flake8==6.0.0
+# pytest==8.3.4
+# pytest-flask==1.3.0
+# black==24.10.0
+# flake8==7.1.1
