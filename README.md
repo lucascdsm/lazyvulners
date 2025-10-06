@@ -189,7 +189,7 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 ## 👥 Autores
 
-- **Desenvolvedor Principal**: [Seu Nome](https://github.com/lucascdsm)
+- **Desenvolvedor Principal**: [Lucas Miranda](https://github.com/lucascdsm)
 
 ## 📞 Suporte
 
