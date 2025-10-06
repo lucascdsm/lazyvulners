@@ -5,6 +5,10 @@
 ![SQLite](https://img.shields.io/badge/SQLite-3+-lightblue.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
+<p align="center">
+  <img width="763" height="1083" alt="image" src="https://github.com/user-attachments/assets/8145ccdd-54a7-4862-8d9b-66741e1980b3" />
+</p>
+
 ## 📋 Visão Geral
 
 O **LazyVulners** é um sistema completo de gerenciamento de vulnerabilidades desenvolvido especificamente para **freelancers de pentest** e **equipes de segurança**. O sistema oferece uma interface intuitiva para gerenciar vulnerabilidades, gerar relatórios personalizados e manter um controle eficiente de projetos de segurança.
@@ -179,259 +183,19 @@ lazyvulners/
 - **Perfil do Usuário**: Interface para alterar senha
 - **Controle de Acesso**: Permissões adequadas por role
 
-## 🔧 Configuração Avançada
-
-### Variáveis de Ambiente
-
-```bash
-# Chave secreta para sessões (obrigatório em produção)
-export SECRET_KEY="sua-chave-secreta-aqui"
-
-# Configurações de banco de dados (opcional)
-export DATABASE_URL="sqlite:///app.sqlite"
-```
-
-### Configurações de Segurança
-
-O sistema inclui várias camadas de segurança:
-
-- **CSRF Protection**: Proteção contra ataques CSRF
-- **Validação de Senhas**: Senhas fortes obrigatórias
-- **Controle de Acesso**: Permissões por role e empresa
-- **Sessões Seguras**: Cookies seguros e HTTPOnly
-- **Upload Seguro**: Validação de tipos e tamanhos de arquivo
-
-### Personalização de Templates
-
-Os templates de relatório podem ser completamente personalizados:
-
-1. **Acesse**: Relatórios → Templates Customizáveis
-2. **Crie um novo template** ou edite existente
-3. **Configure seções**: Escolha quais seções incluir
-4. **Personalize conteúdo**: Texto, cores, fontes
-5. **Teste o template**: Visualize antes de usar
-
-## 📊 Banco de Dados
-
-### Modelos Principais
-
-#### User (Usuário)
-- `id`: Identificador único
-- `username`: Nome de usuário
-- `password_hash`: Hash da senha
-- `role`: Papel (admin, editor, viewer)
-- `company`: Empresa do usuário
-- `created_at`: Data de criação
-
-#### Vulnerability (Vulnerabilidade)
-- `id`: Identificador único
-- `title`: Título da vulnerabilidade
-- `severity`: Severidade (Critical, High, Medium, Low, Informative)
-- `status`: Status (Open, In Progress, Closed)
-- `cvss`: Score CVSS
-- `company`: Empresa
-- `description`: Descrição técnica
-- `impact`: Análise de impacto
-- `likelihood`: Análise de probabilidade
-- `remediation`: Passos de remediação
-- `references`: Referências
-- `comments`: Comentários
-- `client_name`: Nome do cliente (freelancer)
-- `project_name`: Nome do projeto (freelancer)
-- `test_type`: Tipo de teste (freelancer)
-- `test_date`: Data do teste (freelancer)
-- `tester_name`: Nome do pentester (freelancer)
-- `client_contact`: Contato do cliente (freelancer)
-- `created_at`: Data de criação
-- `updated_at`: Data de atualização
-
-#### ReportTemplate (Template de Relatório)
-- `id`: Identificador único
-- `company`: Empresa
-- `name`: Nome do template
-- `description`: Descrição
-- `cover_title`: Título da capa
-- `cover_subtitle`: Subtítulo da capa
-- `cover_company`: Empresa na capa
-- `cover_date`: Data na capa
-- `cover_logo_url`: URL do logo
-- `legal_notice`: Aviso legal
-- `introduction`: Introdução
-- `executive_summary`: Sumário executivo
-- `scope`: Escopo
-- `methodology`: Metodologia
-- `risk_classification`: Classificação de riscos
-- `primary_color`: Cor primária
-- `secondary_color`: Cor secundária
-- `font_family`: Família da fonte
-- `font_size`: Tamanho da fonte
-- `include_*`: Flags para incluir seções
-- `is_default`: Template padrão
-- `created_at`: Data de criação
-- `updated_at`: Data de atualização
-
-## 🚀 Deploy em Produção
-
-### 1. Configuração do Servidor
-
-```bash
-# Instalar dependências do sistema
-sudo apt update
-sudo apt install python3 python3-pip python3-venv nginx
-
-# Configurar aplicação
-git clone https://github.com/seu-usuario/lazyvulners.git
-cd lazyvulners
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2. Configuração do Nginx
-
-```nginx
-server {
-    listen 80;
-    server_name seu-dominio.com;
-    
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-### 3. Configuração do Systemd
-
-```ini
-[Unit]
-Description=LazyVulners Web Application
-After=network.target
-
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/path/to/lazyvulners
-Environment=PATH=/path/to/lazyvulners/venv/bin
-ExecStart=/path/to/lazyvulners/venv/bin/python run.py
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-### 4. Configurações de Segurança
-
-```bash
-# Configurar HTTPS
-sudo certbot --nginx -d seu-dominio.com
-
-# Configurar firewall
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw enable
-```
-
-## 🔧 Desenvolvimento
-
-### Estrutura de Desenvolvimento
-
-```bash
-# Clonar repositório
-git clone https://github.com/seu-usuario/lazyvulners.git
-cd lazyvulners
-
-# Criar ambiente virtual
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate     # Windows
-
-# Instalar dependências
-pip install -r requirements.txt
-
-# Executar em modo desenvolvimento
-python run.py
-```
-
-### Adicionando Novas Funcionalidades
-
-1. **Modelos**: Adicione novos modelos em `app/models.py`
-2. **Rotas**: Crie novas rotas em `app/views.py`
-3. **Formulários**: Adicione formulários em `app/forms.py`
-4. **Templates**: Crie templates em `templates/`
-5. **Estilos**: Adicione CSS em `static/css/`
-
-### Testes
-
-```bash
-# Executar testes (quando implementados)
-python -m pytest tests/
-
-# Teste de integração
-python test_integration.py
-```
-
-## 📈 Melhorias Futuras
-
-### Funcionalidades Planejadas
-
-- **🔔 Notificações**: Sistema de alertas por email
-- **📊 Analytics**: Dashboard avançado com métricas
-- **🔗 Integrações**: APIs para ferramentas externas
-- **📱 Mobile**: Aplicativo móvel
-- **🌐 Multi-idioma**: Suporte a múltiplos idiomas
-- **🤖 IA**: Sugestões automáticas de remediação
-- **📈 Relatórios**: Mais tipos de relatórios
-- **🔒 2FA**: Autenticação de dois fatores
-- **📊 Métricas**: KPIs e dashboards avançados
-
-### Melhorias Técnicas
-
-- **⚡ Performance**: Otimização de consultas
-- **🔒 Segurança**: Auditoria de segurança
-- **📱 Responsivo**: Interface mobile-first
-- **🧪 Testes**: Cobertura de testes completa
-- **📚 Documentação**: Documentação da API
-- **🐳 Docker**: Containerização
-- **☁️ Cloud**: Deploy em nuvem
-
-## 🤝 Contribuição
-
-### Como Contribuir
-
-1. **Fork** o repositório
-2. **Crie** uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
-3. **Commit** suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
-4. **Push** para a branch (`git push origin feature/nova-funcionalidade`)
-5. **Abra** um Pull Request
-
-### Padrões de Código
-
-- **Python**: PEP 8
-- **HTML**: HTML5 semântico
-- **CSS**: BEM methodology
-- **JavaScript**: ES6+
-- **Commits**: Conventional Commits
-
 ## 📄 Licença
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ## 👥 Autores
 
-- **Desenvolvedor Principal**: [Seu Nome](https://github.com/seu-usuario)
-- **Contribuidores**: Veja [CONTRIBUTORS.md](CONTRIBUTORS.md)
+- **Desenvolvedor Principal**: [Seu Nome](https://github.com/lucascdsm)
 
 ## 📞 Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/lazyvulners/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/seu-usuario/lazyvulners/discussions)
-- **Email**: suporte@lazyvulners.com
+- **Issues**: [GitHub Issues](https://github.com/lucascdsm/lazyvulners/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/lucascdsm/lazyvulners/discussions)
+- **Email**: lucascm1358@gmail.com
 
 ## 🙏 Agradecimentos
 
